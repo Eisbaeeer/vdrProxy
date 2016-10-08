@@ -1,5 +1,5 @@
 [Unit]
-Description=An simple proxy for Plex and VDR
+Description=A simple proxy for Plex and VDR
 
 [Service]
 Environment=
