@@ -1,0 +1,8 @@
+start on (local-filesystems and stopped networking)
+stop on runlevel [!2345]
+
+respawn
+
+script
+    /opt/vdrProxy/venv/bin/python /opt/vdrProxy/vdrProxy.py
+end script
