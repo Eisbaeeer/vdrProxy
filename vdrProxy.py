@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from gevent import monkey; monkey.patch_all()  # need to patch sockets to make requests async
 from gevent.pywsgi import WSGIServer
 import time
@@ -11,25 +12,26 @@ app = Flask(__name__)
 
 # URL format: <protocol>://<username>:<password>@<hostname>:<port>, example: https://test:1234@localhost:9981
 config = {
-    'tvhURL': 'http://test:test@127.0.0.1:9981',
-    'tvhProxyURL': 'http://127.0.0.1',
-    'tvhProxyPort': 5004,  # do _NOT_ change this.
-    'tunerCount': 6  # number of tuners in tvh
+    'restfulURL': 'http://VDR:8002',
+    'streamdevURL': 'http://VDR:3000/TS',
+    'vdrProxyURL': 'http://127.0.0.1',
+    'vdrProxyPort': 5004,  # do _NOT_ change this.
+    'tunerCount': 2  # number of tuners in vdr
 }
 
 
 @app.route('/discover.json')
 def discover():
     return jsonify({
-        'FriendlyName': 'tvhProxy',
+        'FriendlyName': 'vdrProxy',
         'ModelNumber': 'HDTC-2US',
         'FirmwareName': 'hdhomeruntc_atsc',
         'TunerCount': config['tunerCount'],
         'FirmwareVersion': '20150826',
         'DeviceID': '12345678',
         'DeviceAuth': 'test1234',
-        'BaseURL': '%s:%s' % (config['tvhProxyURL'], config['tvhProxyPort']),
-        'LineupURL': '%s:%s/lineup.json' % (config['tvhProxyURL'], config['tvhProxyPort'])
+        'BaseURL': '%s:%s' % (config['vdrProxyURL'], config['vdrProxyPort']),
+        'LineupURL': '%s:%s/lineup.json' % (config['vdrProxyURL'], config['vdrProxyPort'])
     })
 
 
@@ -48,13 +50,12 @@ def lineup():
     lineup = []
 
     for c in _get_channels():
-        if c['enabled']:
-            url = '%s/auto/v%s' % (config['tvhProxyURL'], c['number'])
+        url = '%s/auto/v%s' % (config['vdrProxyURL'], c['number'])
 
-            lineup.append({'GuideNumber': str(c['number']),
-                           'GuideName': c['name'],
-                           'URL': url
-                           })
+        lineup.append({'GuideNumber': str(c['number']),
+                       'GuideName': c['name'],
+                       'URL': url
+                       })
 
     return jsonify(lineup)
 
@@ -70,7 +71,7 @@ def stream(channel):
 
     for c in _get_channels():
         if str(c['number']) == channel:
-            url = '%s/stream/channel/%s' % (config['tvhURL'], c['uuid'])
+            url = '%s/%d' % (config['streamdevURL'], c['number'])
 
     if not url:
         abort(404)
@@ -89,18 +90,18 @@ def stream(channel):
 
 
 def _get_channels():
-    url = '%s/api/channel/grid?start=0&limit=999999' % config['tvhURL']
+    url = '%s/channels.json' % config['restfulURL']
 
     try:
         r = requests.get(url)
-        return r.json()['entries']
+        return r.json()['channels']
 
     except Exception as e:
         print('An error occured: ' + repr(e))
 
 
 if __name__ == '__main__':
-    http = WSGIServer(('', config['tvhProxyPort']), app.wsgi_app)
+    http = WSGIServer(('', config['vdrProxyPort']), app.wsgi_app)
     http.serve_forever()
 
-#    app.run(port=config['tvhProxyPort'], host='0.0.0.0', threaded=True)
+#    app.run(port=config['vdrProxyPort'], host='0.0.0.0', threaded=True)

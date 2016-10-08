@@ -1,0 +1,13 @@
+[Unit]
+Description=An simple proxy for Plex and VDR
+
+[Service]
+Environment=
+# using system wide installed dependencies:
+ExecStart=/usr/bin/python /usr/local/bin/vdrProxy.py
+# or using a virtualenv:
+# ExecStart=/home/HOME/vdrProxy/venv/bin/python /home/HOME/vdrProxy/vdrProxy.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
