@@ -13,7 +13,7 @@ app = Flask(__name__)
 # URL format: <protocol>://<username>:<password>@<hostname>:<port>, example: https://test:1234@localhost:9981
 config = {
     'restfulURL': 'http://VDR:8002',
-    'streamdevURL': 'http://VDR:3000/TS',
+    'streamdevURL': 'http://VDR:3000/EXT',
     'vdrProxyURL': 'http://127.0.0.1',
     'vdrProxyPort': 5004,  # do _NOT_ change this.
     'tunerCount': 2  # number of tuners in vdr
