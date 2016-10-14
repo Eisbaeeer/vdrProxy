@@ -12,4 +12,4 @@ if [ "$SERVER_PROTOCOL" = HTTP ]; then
   [ "$REQUEST_METHOD" = HEAD ] && exit 0
 fi
 
-ffmpeg -y -i - -dn -ignore_unknown -c copy -map 0 -f mpegts pipe:1 2>/tmp/externremux.$$
+ffmpeg -y -i - -dn -ignore_unknown -c copy -map 0 -f mpegts - 2>/tmp/externremux.$$
